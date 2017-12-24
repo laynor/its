@@ -14,23 +14,36 @@
 
   :plugins [[lein-figwheel "0.5.14"]
             [lein-npm "0.6.2"]
-            [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]]
+            [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]
+            [lein-doo "0.1.8"]]
 
   :npm {:dependencies [[x11 "2.3.0"]]
         :devDependencies [[ws "3.3.3"]]}
+
   :cljsbuild {:builds [{:id "server-dev"
-                        :source-paths ["server_src"]
+                        :source-paths ["src"]
                         :figwheel true
+                        :test-commands {"unit" ["nodejs"
+                                                "target/out/unit-test.js"]}
                         :compiler {:main its.core
-                                   :output-to "target/server_out/its.js"
-                                   :output-dir "target/server_out"
+                                   :output-to "target/out/its.js"
+                                   :output-dir "target/out"
                                    :target :nodejs
                                    :optimizations :none
-                                   :source-map true }}]}
+                                   :source-map true }}
+                       {:id "test"
+                        :source-paths ["src" "test"]
+                        :compiler {:output-to "target/out-test/unit-test.js"
+                                   :output-dir "target/out-test"
+                                   :target :nodejs
+                                   :main its.runner
+                                   :pretty-print true}}]}
 
   :figwheel {}
+
   :profiles {:dev {:dependencies [[figwheel-sidecar "0.5.14"]
                                   [com.cemerick/piggieback "0.2.2"]]
-                   :source-paths ["server_src"]
+                   :source-paths ["src"]
                    :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
-                   :clean-targets ^{:protect false} ["target"]}})
+                   :clean-targets ^{:protect false} ["target"]}
+             })

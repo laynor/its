@@ -8,12 +8,12 @@
 ;; Window manager state
 (defonce state (atom {}))
 
-(defn its-init!
+(defn tinywm-init!
   "WM initialization"
   [error display]
   (let [root (.-root (nth display.screen 0))
         x display.client
-        mod-1-mask (bit-shift-left 1 3)
+        mod-1-mask 2r1000
         keysym-f1 67
         grab-mode-async 1
         none 0]
@@ -72,10 +72,13 @@
 
 (def events (chan 10))
 
-(defn tinywm []
+(defn start-event-handler! []
   (go-loop [exit nil]
     (let [res (<! events)]
       (when-not exit
-        (recur (handle-event res)))))
-  (let [client (x11.createClient #js {:display ":1"} its-init!)]
+        (recur (handle-event res))))))
+
+(defn tinywm []
+  (start-event-handler!)
+  (let [client (x11.createClient #js {:display ":1"} tinywm-init!)]
     (.on client "event" (partial put! events))))
