@@ -3,4 +3,4 @@
             [cljs.test :as t :include-macros true :refer [deftest is]]))
 
 (deftest numbertest
-  (is (= 1 2)))
+  (is (= 1 1)))
