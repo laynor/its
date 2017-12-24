@@ -1,5 +1,7 @@
 (ns ^:figwheel-always its.tinywm
-  (:require [cljs.nodejs :as nodejs]))
+  (:require-macros [cljs.core.async.macros :refer [go go-loop]])
+  (:require [cljs.nodejs :as nodejs]
+            [clojure.core.async :as async :refer [put! <! >! close! chan timeout]]))
 
 (def x11 (nodejs/require "x11"))
 
@@ -36,11 +38,14 @@
                   none none
                   3 mod-1-mask)))
 
+
 (defn handle-event [ev]
   (let [s @state
         start  (:start s)
         attr   (:attr s)
         client (:client s)]
+
+    (println "handling")
     (case ev.name
       "KeyPress"      (when (not= ev.child 0)
                         (println "foobar")
@@ -62,8 +67,15 @@
                                              (+ attr.yPos (if (= 1 start.keycode) ydiff 0))
                                              (max 1 (+ attr.width  (if (= 3 start.keycode) xdiff 0)))
                                              (max 1 (+ attr.height (if (= 3 start.keycode) ydiff 0))))))
-      nil)))
+      nil)
+    nil))
+
+(def events (chan 10))
 
 (defn tinywm []
+  (go-loop [exit nil]
+    (let [res (<! events)]
+      (when-not exit
+        (recur (handle-event res)))))
   (let [client (x11.createClient #js {:display ":1"} its-init!)]
-    (.on client "event" (fn [ev] (handle-event ev)))))
+    (.on client "event" (partial put! events))))
