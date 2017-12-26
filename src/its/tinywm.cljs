@@ -45,7 +45,6 @@
         attr   (:attr s)
         client (:client s)]
 
-    (println "handling")
     (case ev.name
       "KeyPress"      (when (not= ev.child 0)
                         (println "foobar")
@@ -70,7 +69,7 @@
       nil)
     nil))
 
-(def events (chan 10))
+(defonce events (chan 10))
 
 (defn start-event-handler! []
   (go-loop [exit nil]

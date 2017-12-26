@@ -20,11 +20,11 @@
   :npm {:dependencies [[x11 "2.3.0"]]
         :devDependencies [[ws "3.3.3"]]}
 
-  :cljsbuild {:builds [{:id "server-dev"
+  :cljsbuild {:test-commands {"unit" ["nodejs"
+                                      "target/out/unit-test.js"]}
+              :builds [{:id "server-dev"
                         :source-paths ["src"]
                         :figwheel true
-                        :test-commands {"unit" ["nodejs"
-                                                "target/out/unit-test.js"]}
                         :compiler {:main its.core
                                    :output-to "target/out/its.js"
                                    :output-dir "target/out"
