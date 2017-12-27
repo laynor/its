@@ -25,6 +25,14 @@ and run the script with node:
 
 
 Works on CIDER too.
+Put this in your emacs dotfile:
+
+    (require 'cider)
+    (setq cider-cljs-lein-repl
+          "(do (require 'figwheel-sidecar.repl-api)
+             (figwheel-sidecar.repl-api/start-figwheel!)
+             (figwheel-sidecar.repl-api/cljs-repl))")
+
 
 To clean all compiled files:
 
