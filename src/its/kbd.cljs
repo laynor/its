@@ -32,3 +32,6 @@
 (defn empty-keymap [] {})
 
 (def map-key assoc-in)
+
+(defn defkey [keymap keyseq command]
+  (swap! keymap map-key keyseq command))

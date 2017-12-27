@@ -13,7 +13,7 @@ Install npm dependencies with
 
 Run a Xephyr server on display :1, or change the hardcoded display value in core.cljs.
 
-    $ Xephyr -screen 1024x768 :1
+    $ Xephyr -resizeable :1
 
 To get an interactive development environment run:
 
