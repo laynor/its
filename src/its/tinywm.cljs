@@ -1,12 +1,9 @@
 (ns ^:figwheel-always its.tinywm
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [cljs.nodejs :as nodejs]
-            [its.util :as util]
-            [its.window :as window]
-            [its.x11 :as x11]
             [clojure.core.async :as async :refer [put! <! >! close! chan timeout]]))
 
-(def nodex11 (nodejs/require "x11"))
+(def x11 (nodejs/require "x11"))
 
 ;; Window manager state
 (defonce state (atom {}))
@@ -14,81 +11,73 @@
 (defn tinywm-init!
   "WM initialization"
   [error display]
-  (let [client display.client
-        root (window/get-screen-root client 0)
+  (let [root (.-root (nth display.screen 0))
+        x display.client
         mod-1-mask 2r1000
         keysym-f1 67
         grab-mode-async 1
         none 0]
-    (swap! state assoc :client client)
+    (swap! state assoc :client x)
 
-    (client.GrabKey root true mod-1-mask keysym-f1
-                    grab-mode-async grab-mode-async)
+    (x.GrabKey root true mod-1-mask keysym-f1
+               grab-mode-async grab-mode-async)
 
-    (client.GrabButton root true
-                       (bit-or nodex11.eventMask.ButtonPress
-                               nodex11.eventMask.ButtonRelease
-                               nodex11.eventMask.PointerMotion)
-                       grab-mode-async grab-mode-async
-                       none none
-                       1 mod-1-mask)
+    (x.GrabButton root true
+                  (bit-or x11.eventMask.ButtonPress
+                          x11.eventMask.ButtonRelease
+                          x11.eventMask.PointerMotion)
+                  grab-mode-async grab-mode-async
+                  none none
+                  1 mod-1-mask)
 
-    (client.GrabButton root true
-                       (bit-or nodex11.eventMask.ButtonPress
-                               nodex11.eventMask.ButtonRelease
-                               nodex11.eventMask.PointerMotion)
-                       grab-mode-async grab-mode-async
-                       none none
-                       3 mod-1-mask)))
-
-
-
+    (x.GrabButton root true
+                  (bit-or x11.eventMask.ButtonPress
+                          x11.eventMask.ButtonRelease
+                          x11.eventMask.PointerMotion)
+                  grab-mode-async grab-mode-async
+                  none none
+                  3 mod-1-mask)))
 
 
 (defn handle-event [ev]
-  (let [{start :start attr :attr client :client} @state
-        win (:child ev)]
+  (let [s @state
+        start  (:start s)
+        attr   (:attr s)
+        client (:client s)]
 
-    (when client
-      (case (:name ev)
-        :key-press      (when (window/valid? win)
-                          (window/raise-window client win))
+    (case ev.name
+      "KeyPress"      (when (not= ev.child 0)
+                        (println "foobar")
+                        (client.RaiseWindow ev.child))
 
-        :button-press   (when (window/valid? win)
-                          (let [c (chan 1)]
-                            (.GetGeometry client win #(put! c (util/lispify %2)))
-                            (go (swap! state merge  {:start ev
-                                                     :attr (<! c)}))))
+      "ButtonPress"   (when (and client (not= ev.child 0))
+                        (.GetGeometry client ev.child
+                                      (fn [err attr]
+                                        (swap! state assoc :start ev)
+                                        (swap! state assoc :attr  attr))))
 
+      "ButtonRelease" (swap! state assoc :start nil)
 
-        :button-release (swap! state assoc :start nil)
+      "MotionNotify"  (when (and start (not= start.child 0))
+                        (let [xdiff (- ev.rootx start.rootx)
+                              ydiff (- ev.rooty start.rooty)]
+                          (.MoveResizeWindow client start.child
+                                             (+ attr.xPos (if (= 1 start.keycode) xdiff 0))
+                                             (+ attr.yPos (if (= 1 start.keycode) ydiff 0))
+                                             (max 1 (+ attr.width  (if (= 3 start.keycode) xdiff 0)))
+                                             (max 1 (+ attr.height (if (= 3 start.keycode) ydiff 0))))))
+      nil)
+    nil))
 
-        :motion-notify  (when (and start (window/valid? (:child start)))
-                          (let [xdiff (- (:rootx ev) (:rootx start))
-                                ydiff (- (:rooty ev) (:rooty start))
-                                keycode (:keycode start)
-                                is-lmb (= 1 keycode)
-                                is-rmb (= 3 keycode)
-                                win (:child start)]
-                            (window/set-geometry client win
-                                                 (+ (:x-pos attr) (if is-lmb xdiff 0))
-                                                 (+ (:y-pos attr) (if is-lmb ydiff 0))
-                                                 (max 1 (+ (:width attr)
-                                                           (if is-rmb xdiff 0)))
-                                                 (max 1 (+ (:height attr)
-                                                           (if is-rmb ydiff 0))))))
-        :quit ::quit
-        nil))))
+(defonce events (chan 10))
 
-
-(defn start-event-handler! [f events]
-  "Starts an asynchronous event handler. f is called on the event."
-  (go-loop [retval nil]
-    (let [ev (<! events)]
-      (when-not (= retval ::quit)
-        (recur (f (util/lispify-event ev)))))))
-
+(defn start-event-handler! []
+  (go-loop [exit nil]
+    (let [res (<! events)]
+      (when-not exit
+        (recur (handle-event res))))))
 
 (defn tinywm []
-  (let [[client events] (x11/create-client ":1" tinywm-init!)]
-    (start-event-handler! handle-event events)))
+  (start-event-handler!)
+  (let [client (x11.createClient #js {:display ":1"} tinywm-init!)]
+    (.on client "event" (partial put! events))))
