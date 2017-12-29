@@ -30,13 +30,24 @@
   ;;   (client.GrabKey root true mod-1-mask keysym-f1
   ;;                   grab-mode-async grab-mode-async)
 
-    (client.GrabButton root true
-                       (apply bit-or
-                              (map event-mask->x11
-                                   #{:button-press :button-release :pointer-motion}))
-                       (grab-mode->x11 :async) (grab-mode->x11 :async)
-                       (or nil 0) (or nil 0)
-                       1 mod-1-mask)
+(defn- grab-button
+  [client wid owner-events mask pointer-mode keyb-mode confine-to cursor button modifiers]
+  (.GrabButton client
+               win
+               owner-events
+               mask
+               pointer-mode
+               keyb-mode
+               confine-to
+               cursor
+               button
+               modifiers))
+                     ;; (apply bit-or
+                     ;;        (map event-mask->x11
+                     ;;             #{:button-press :button-release :pointer-motion}))
+                     ;; (grab-mode->x11 :async) (grab-mode->x11 :async)
+                     ;; (or nil 0) (or nil 0)
+                     ;; 1 mod-1-mask))
 
   ;;   (client.GrabButton root true
   ;;                      (bit-or nodex11.eventMask.ButtonPress
