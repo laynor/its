@@ -18,7 +18,8 @@
             [lein-cljsbuild "1.1.7" :exclusions [[org.clojure/clojure]]]
             [lein-doo "0.1.8"]]
 
-  :npm {:dependencies [[x11 "2.3.0"]]
+  :npm {:dependencies [[x11 "2.3.0"]
+                       [keysym "0.0.6"]]
         :devDependencies [[ws "3.3.3"]]}
 
   :cljsbuild {:test-commands {"unit" ["nodejs"
