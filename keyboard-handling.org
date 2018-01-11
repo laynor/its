@@ -10,4 +10,11 @@
    | .          [#{:mod1          } :XK_Y]   |
    | .          [#{:mod3    :mod1 } :XK_K] ] |
    |-----------------------------------------|
-   | nodex11: keysyms and mods as numbers    |
+   | nodex11: keycodes and mods as numbers   |
+   |-----------------------------------------|
+
+
+** X11 Keyboard mapping
+   vector addressed by keycode:
+   first value is the keysym associated to the keycode
+   second value is the keysym associated to the keycode when shift is pressed
