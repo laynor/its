@@ -22,19 +22,19 @@
 
     (println "mastucci")
 
-    (x11/grab-key client root true #{:meta} keysym-f1 :async :async)
+    (x11/grab-key client root true #{:mod1} keysym-f1 :async :async)
 
     (x11/grab-button client root true
                      #{:button-press :button-release :pointer-motion}
                      :async :async
                      nil nil
-                     :left #{:meta})
+                     :left #{:mod1})
 
     (x11/grab-button client root true
                      #{:button-press :button-release :pointer-motion}
                      :async :async
                      nil nil
-                     :right #{:meta})))
+                     :right #{:mod1})))
 
 
 (defn start-event-handler! [f events]

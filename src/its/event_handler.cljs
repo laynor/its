@@ -14,10 +14,15 @@
     (when client
       (case (:name ev)
         :key-press      (when (window/valid? win)
+                          (let [mappings (x11/get-keyboard-mapping client)]
+                            (go (let [m (<! mappings)
+                                      kcode ev.keycode]
+                                  (swap! state assoc-in [:kmap] m))))
                           (window/raise-window client win))
 
         :button-press   (when (window/valid? win)
                           (let [c (chan 1)]
+                            ;; TODO wrap next call in its.x11
                             (.GetGeometry client win #(put! c (util/lispify %2)))
                             (go (swap! state merge  {:start ev
                                                      :attr (<! c)}))))

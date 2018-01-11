@@ -17,9 +17,3 @@
           [#{:control} "b"]
           [#{:meta} "c"]
           [#{} "d"]])))
-
-(deftest mod->x11 [mod]
-  (is (= (kbd/mod->x11 #{:meta}) 0x8))
-  (is (= (kbd/mod->x11 #{:super :hyper}) 0x60))
-  (is (= (kbd/mod->x11 #{:meta :control}) 0xc))
-  (is (= (kbd/mod->x11 #{:shift :meta :super} 0x49))))

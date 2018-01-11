@@ -1,5 +1,12 @@
 (ns ^:figwheel-always its.kbd
-  (:require [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [its.x11 :as x11]))
+
+;;;
+;;; keybindings:
+;;; chord: str->x11 => modmap + keysym
+;;; seq  : kbd => [[keysym modmap] [keysym modmap]]
+
 
 (def str->mods
   {"C" :control
@@ -9,16 +16,6 @@
    "H" :hyper
    "S" :shift})
 
-(def mods->x11
-  {:shift   0x1
-   :lock    0x2
-   :control 0x4
-   :meta    0x8
-   :hyper   0x20
-   :super   0x40})
-
-(defn mod->x11 [mod]
-  (reduce bit-or 0 (map mods->x11 mod)))
 
 (defn parse-chord [chord]
   (let [res (str/split chord #"-")]
@@ -35,3 +32,21 @@
 
 (defn defkey [keymap keyseq command]
   (swap! keymap map-key keyseq command))
+
+;; TODO: get from keyboard mappings
+;;       also needed for upper?, to work on different layouts.
+(defn mods->x11mods [mods shift]
+  (let [->x11 {:shift   :shift
+               :lock    :lock
+               :control :control
+               :meta    :mod1
+               :hyper   :mod3
+               :super   :mod4}]
+    (into (if shift #{:shift} #{}) (map ->x11 mods))))
+
+(defn upper? [key]
+  false)
+
+(defn chord->x11 [[mods key]]
+  [(mods->x11mods mods (upper? key))
+   (->keysym key)])

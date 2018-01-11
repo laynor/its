@@ -1,0 +1,13 @@
+* Keyboard handling
+** Layers
+
+   | its.kbd: (kbd "C-A M-y H-M-k"),       |
+   | .        [ [#{:control       }   "A"] |
+   | .          [#{:meta          }   "y"] |
+   | .          [#{:hyper   :meta }   "k"] ] |
+   |---------------------------------------|
+   | its.x11: [ [#{:control :shift} :XK_A] |
+   | .          [#{:mod1          } :XK_Y] |
+   | .          [#{:mod3    :mod1 } :XK_K] ] |
+   |---------------------------------------|
+   | nodex11: keysyms and mods as numbers  |
