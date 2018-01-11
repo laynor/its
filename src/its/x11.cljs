@@ -32,14 +32,6 @@
    :mod5   80})
 
 
-;; TODO: get from keyboard mappings
-(def key->mod
-  {:shift   :shift
-   :lock    :lock
-   :control :control
-   :meta    :mod1
-   :hyper   :mod3
-   :super   :mod4})
 
 (defn key->x11 [k]
   (mod->x11 (key->mod k)))

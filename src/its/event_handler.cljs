@@ -6,20 +6,21 @@
             [its.x11 :as x11]
             [its.state :refer [state]]))
 
+(defn- handle-key [client ev win]
+  (when (window/valid? win)
+    (let [mappings (x11/get-keyboard-mapping client)]
+      (go (let [m (<! mappings)
+                kcode ev.keycode]
+            (swap! state assoc-in [:kmap] m))))
+    (window/raise-window client win)))
+
 (defn handle-event [ev]
   (let [{start :start attr :attr client :client} @state
         win (:child ev)]
 
-    (println "foo")
     (when client
       (case (:name ev)
-        :key-press      (when (window/valid? win)
-                          (let [mappings (x11/get-keyboard-mapping client)]
-                            (go (let [m (<! mappings)
-                                      kcode ev.keycode]
-                                  (swap! state assoc-in [:kmap] m))))
-                          (window/raise-window client win))
-
+        :key-press      (handle-key client ev win)
         :button-press   (when (window/valid? win)
                           (let [c (chan 1)]
                             ;; TODO wrap next call in its.x11

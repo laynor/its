@@ -15,14 +15,14 @@
   (let [client display.client
         root (window/get-screen-root client 0)
         mod-1-mask 2r1000
-        keysym-f1 67
+        keycode-f1 67
         grab-mode-async 1
         none 0]
     (swap! state assoc :client client)
 
     (println "mastucci")
 
-    (x11/grab-key client root true #{:mod1} keysym-f1 :async :async)
+    (x11/grab-key client root true #{:mod1} keycode-f1 :async :async)
 
     (x11/grab-button client root true
                      #{:button-press :button-release :pointer-motion}

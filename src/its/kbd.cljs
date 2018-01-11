@@ -16,7 +16,6 @@
    "H" :hyper
    "S" :shift})
 
-
 (defn parse-chord [chord]
   (let [res (str/split chord #"-")]
     [(into #{} (map str->mods (butlast res)))
@@ -40,8 +39,10 @@
                :lock    :lock
                :control :control
                :meta    :mod1
+               :numlock :mod2
                :hyper   :mod3
-               :super   :mod4}]
+               :super   :mod4
+               :altgr   :mod5}]
     (into (if shift #{:shift} #{}) (map ->x11 mods))))
 
 (defn upper? [key]
