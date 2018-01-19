@@ -48,6 +48,6 @@
 (defn upper? [key]
   false)
 
-(defn chord->x11 [[mods key]]
-  [(mods->x11mods mods (upper? key))
-   (->keysym key)])
+;; (defn chord->x11 [[mods key]]
+;;   [(mods->x11mods mods (upper? key))
+;;    (->keysym key)])

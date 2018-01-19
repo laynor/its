@@ -18,3 +18,13 @@
    vector addressed by keycode:
    first value is the keysym associated to the keycode
    second value is the keysym associated to the keycode when shift is pressed
+
+   Needed:
+   unicode->keycode
+    keysym->keycode: for grab-key
+    unicode->keysym: for kbd/define-key
+
+   keycode->unicode: for the keyboard event handler + keymap
+
+   itsmod->x11mod: for grab-key
+   x11mod->itsmod: for keyboard event handler + keymap

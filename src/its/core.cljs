@@ -1,12 +1,12 @@
 (ns ^:figwheel-always its.core
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
-  (:require [cljs.nodejs :as nodejs]
+  (:require [cljs.nodejs        :as nodejs]
             [clojure.core.async :as async :refer [put! <! >! close! chan timeout]]
-            [its.util :as util]
-            [its.window :as window]
-            [its.x11 :as x11]
-            [its.event-handler :refer [handle-event]]
-            [its.state :refer [state]]))
+            [its.event-handler  :refer [handle-event]]
+            [its.state          :refer [state]]
+            [its.util           :as util]
+            [its.window         :as window]
+            [its.x11            :as x11]))
 
 
 (defn its-init!
@@ -18,11 +18,14 @@
         keycode-f1 67
         grab-mode-async 1
         none 0]
+
     (swap! state assoc :client client)
 
     (println "mastucci")
 
-    (x11/grab-key client root true #{:mod1} keycode-f1 :async :async)
+    ;; (x11/grab-key client root true #{:mod1} keycode-f1 :async :async)
+    (x11/grab-key client root #{:mod1} :XK_F1)
+
 
     (x11/grab-button client root true
                      #{:button-press :button-release :pointer-motion}

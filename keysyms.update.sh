@@ -7,11 +7,11 @@ curl -L $keysymdef_url -o $keysymdef
 # gcc -fpreprocessed -dD -E $keysymdef
 
 (
-echo "
-;; 
+echo ";; -*- mode: fundamental -*-
+;;
 ;; This file is automatically translated from X.Org's xproto/keysymdef.h
 ;; Please, do not update this file with your hands, run $(basename "$0").
-;; 
+;;
 
 (ns its.keysyms)
 
