@@ -57,14 +57,10 @@
 
 (defn init-keyboard-support! [display]
   (let [[mappings-chan min-keycode] (get-keyboard-mapping display)]
-    (go (let [foo (do (println "antani1") 12)
-              mappings        (<! mappings-chan)
-              bar (do (println "antani2") 13)
-              keycode-table (concat (replicate min-keycode (vec (replicate 20 0)))
+    (go (let [mappings        (<! mappings-chan)
+              keycode-table   (concat (replicate min-keycode (vec (replicate 20 0)))
                                       mappings)
               keysym->keycode (keysym->keycode-map keycode-table)]
-
-          (println "INIT KEYBOARD:" (map (take 10) [keycode-table keysym->keycode]))
 
           (swap! x11-state (fn [s]
                              (-> s
@@ -126,8 +122,8 @@
   "Returns an x11 client and its event channel as [client events]"
   (let [events (chan 10)
         init! (fn [error display]
-                (init-x11! error display)
-                (init-fun error display))
+                (go (<! (init-x11! error display))
+                    (init-fun error display)))
         client (nodex11.createClient #js {:display display-name} init!)]
     (.on client "event" (partial put! events))
     [client events]))
@@ -146,9 +142,15 @@
 
   ([client wid modifiers keysym]
    ;; keycode, shift -> keysym
-   (grab-key client wid true modifiers
-             (keysym->keycode keysym)
-             :async :async)))
+   (let [kc-list (keysym->keycode keysym)]
+     (doseq [{kcode :kcode shift? :shift?} kc-list]
+       (let [mods (if shift?
+                    (conj modifiers :shift)
+                    modifiers)]
+         (grab-key client wid true
+                   mods
+                   kcode
+                   :async :async))))))
 
 (defn grab-button
   [client wid owner-events mask pointer-mode keyb-mode confine-to cursor button modifiers]
